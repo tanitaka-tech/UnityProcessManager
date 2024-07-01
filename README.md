@@ -1,8 +1,6 @@
 [![openupm](https://img.shields.io/npm/v/com.tanitaka.unity-process-manager?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.tanitaka.unity-process-manager/)
 ![license](https://img.shields.io/github/license/tanitaka-tech/UnityProcessManager)
 
-⚠️このパッケージは現在開発中です...
-
 ## コンセプト
 
 現状の殆どのクライアントフレームワークには大きな欠陥があります。
@@ -18,7 +16,9 @@
 Sceneを構成する各パーツからの要求を示す構造体です。
 
 UnityProcessManagerはRequestを使うことでSceneからパーツへの依存を排除するほか、
-Requestを手続き的にハンドリングすることで、 Sceneの流れを分かりやすく、正確に表現するためのパッケージです。
+Requestを手続き的にハンドリングすることで、 処理の流れを分かりやすく、正確に表現するためのパッケージです。
+
+<img width="952" alt="Screenshot 2024-07-02 at 6 46 58" src="https://github.com/tanitaka-tech/UnityProcessManager/assets/78785830/4960cbb2-71e3-4662-9d35-ea1f51ba302b">
 
 ## Usage Example
 
@@ -61,7 +61,6 @@ var result = await ConcurrentUniTaskHandler.Create(
 ## メリット
 - Scene内で発生し得るRequestをまとめることで、そのSceneが行使する責務を明確にすることができます。
 - 手続きが正確に表現されるため、処理の流れが非常に追いやすくなります。
-- 手続き処理を
 
 ## デメリット
 - あまりにも快適すぎて、他のフレームワークが使えなくなる恐れがあります。
