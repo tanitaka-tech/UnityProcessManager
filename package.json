@@ -1,0 +1,13 @@
+{
+    "name": "com.tanitaka-tech.unity-process-manager",
+    "displayName": "Unity Process Manager",
+    "version": "1.0.0",
+    "unity": "2022.3",
+    "author": "tanitaka-tech",
+    "description": "Unity Process Manager.",
+    "keywords": [ "Template", "Editor" ],
+    "license": "MIT",
+    "category": "Editor",
+    "dependencies": {
+    }
+}
