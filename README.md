@@ -48,7 +48,7 @@ var waitRequestClass = new WaitRequestClass(
 await ConcurrentProcess.Create(  
         // Effect
         Process.Create(  
-            waitTask: async ct => await EffectRequestConsumer..WaitRequestAndConsumeAsync(ct),  
+            waitTask: async ct => await EffectRequestConsumer.WaitRequestAndConsumeAsync(ct),  
             onPassedTask: async ct =>  
             {  
                 await PlayEffectAsync(ct);
