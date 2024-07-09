@@ -22,41 +22,76 @@ Requestを手続き的にハンドリングすることで、 処理の流れを
 
 ## Usage Example
 
-### Input wait loop (WIP)
+### Bind RequestHandler (Zenject Example)
 ```cs
-var result = await ConcurrentUniTaskHandler.Create(  
+// ----- In some installer
+
+var effectRequestHandler = new RequestHandler<EffectRequest>();
+Container.BindInstance<IRequestPusher<EffectRequest>>(effectRequestHandler);
+
+var closeRequestHandler = new RequestHandler<CloseRequest>();
+Container.BindInstance<IRequestPusher<CloseRequest>>(closeRequestHandler);
+
+var nextSceneRequestHandler = new RequestHandler<NextSceneRequest>();
+Container.BindInstance<IRequestPusher<NextSceneRequest>>(nextSceneRequestHandler);
+
+var waitRequestClass = new WaitRequestClass(
+        effectRequestConsumer: effectRequestHandler,
+        closeRequestConsumer: closeRequestHandler,
+        nextSceneRequestConsumer: nextSceneRequestHandler
+);
+
+```
+
+### Wait Request
+```cs
+await ConcurrentProcess.Create(  
         // Effect
-        ProcessTask.Create(  
-            waitTask: WaitEffectRequestAsync,  
+        Process.Create(  
+            waitTask: async ct => await EffectRequestConsumer..WaitRequestAndConsumeAsync(ct),  
             onPassedTask: async ct =>  
             {  
                 await PlayEffectAsync(ct);
-                return true;  
+                return ProcessContinueType.Continue;
             }),
-    
+        
         // Close
-        ProcessTask.Create(  
-            waitTask: WaitCloseRequestAsync,  
+        Process.Create(  
+            waitTask: async ct => await CloseRequestConsumer.WaitRequestAndConsumeAsync(ct),
             onPassedTask: async ct =>  
             {  
                 await CloseAsync(ct);
-                return false;  
+                return ProcessContinueType.Break;
             }), 
-    
+        
         // NextScene
-        ProcessTask.Create(  
-            waitTask: WaitMoveNextSceneRequestAsync,  
+        Process.Create(  
+            waitTask: async ct => await NextSceneRequestConsumer.WaitRequestAndConsumeAsync(ct),
             onPassedTask: async ct =>  
             {  
                 await LoadNextSceneAsync(ct);
-                return false;
+                return ProcessContinueType.Break;
             }), 
-    )    
-    .LoopProcessFirstCompletedTaskAsync(  
-        checkNeedLoop: result => result,  
-        cancellationToken: cancellationToken  
-);
+        )    
+        .LoopProcessAsync(cancellationToken: ct);
 ```
+
+### Push Request (R3 Example)
+```cs
+// ----- In some object
+
+[SerializeField] private Button _closeButton;
+[Inject] private IRequestPusher<CloseRequest> _closeRequestPusher;
+
+private void Start()
+{
+        _closeButton.OnClickAsObservable()
+                .Subscribe(_ => _closeRequestPusher.PushRequest(new CloseRequest()))
+                .AddTo(this);
+}
+
+```
+
 
 ## メリット
 - Scene内で発生し得るRequestをまとめることで、そのSceneが行使する責務を明確にすることができます。
