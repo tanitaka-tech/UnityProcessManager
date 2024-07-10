@@ -3,34 +3,46 @@
 
 **Docs** ([English](README.md), [日本語](README_JA.md))
 
-## Concept
-Most current client frameworks have a major flaw.
-The issue is that the class managing the Scene becomes dependent on the components (such as buttons) that make up the View within the Scene.
-The challenge is that every time a component is changed, the Scene management class needs to be modified.
-This leads to problems such as increased operational costs for Scenes and personalization.
-As a solution to the above issues, this package proposes and supports
-"Depending on Requests rather than components."
-A Request here refers to a struct representing demands from each component that makes up the Scene, such as "Please transition to a Scene" or "Please call an API."
-UnityProcessManager not only eliminates the dependency of Scenes on components by using Requests,
-but it's also a package for clearly and accurately expressing the flow of processes by handling Requests procedurally.
+## コンセプト
+
+現状の殆どのクライアントフレームワークには大きな欠陥があります。
+それは、Sceneを管理するクラスがScene内のViewを構成するパーツ(ボタンなど)に対して依存してしまう点です。
+
+パーツを変更するたびにScene管理クラスを修正する必要があるという点が課題です。
+これのせいでSceneの運用コストが増加したり、属人化したりなどの問題が発生します。
+
+そこでこのパッケージでは上記の課題の解決策として
+「パーツに依存するのではなく、Requestに依存すること」を提唱、そして支援します。
+
+ここで言うRequestとは、「Scene遷移をして欲しい」「APIを呼んでほしい」などの
+Sceneを構成する各パーツからの要求を示す構造体です。
+
+UnityProcessManagerはRequestを使うことでSceneからパーツへの依存を排除するほか、
+Requestを手続き的にハンドリングすることで、 処理の流れを分かりやすく、正確に表現するためのパッケージです。
 
 <img width="952" alt="Screenshot 2024-07-02 at 6 46 58" src="https://github.com/tanitaka-tech/UnityProcessManager/assets/78785830/4960cbb2-71e3-4662-9d35-ea1f51ba302b">
 
 ## Usage Example
+
 ### Bind RequestHandler (Zenject Example)
 ```cs
 // ----- In some installer
+
 var effectRequestHandler = new RequestHandler<EffectRequest>();
 Container.BindInstance<IRequestPusher<EffectRequest>>(effectRequestHandler);
+
 var closeRequestHandler = new RequestHandler<CloseRequest>();
 Container.BindInstance<IRequestPusher<CloseRequest>>(closeRequestHandler);
+
 var nextSceneRequestHandler = new RequestHandler<NextSceneRequest>();
 Container.BindInstance<IRequestPusher<NextSceneRequest>>(nextSceneRequestHandler);
+
 var waitRequestClass = new WaitRequestClass(
         effectRequestConsumer: effectRequestHandler,
         closeRequestConsumer: closeRequestHandler,
         nextSceneRequestConsumer: nextSceneRequestHandler
 );
+
 ```
 
 ### Wait Request
@@ -69,28 +81,33 @@ await ConcurrentProcess.Create(
 ### Push Request (R3 Example)
 ```cs
 // ----- In some object
+
 [SerializeField] private Button _closeButton;
 [Inject] private IRequestPusher<CloseRequest> _closeRequestPusher;
+
 private void Start()
 {
         _closeButton.OnClickAsObservable()
                 .Subscribe(_ => _closeRequestPusher.PushRequest(new CloseRequest()))
                 .AddTo(this);
 }
+
 ```
 
-## Benefits
-- By consolidating the Requests that can occur within a Scene, you can clearly define the responsibilities that the Scene exercises.
-- As the procedures are accurately expressed, the flow of processing becomes very easy to follow.
 
-## Drawbacks
-- It may be so comfortable that you might find it difficult to use other frameworks.
+## メリット
+- Scene内で発生し得るRequestをまとめることで、そのSceneが行使する責務を明確にすることができます。
+- 手続きが正確に表現されるため、処理の流れが非常に追いやすくなります。
+
+## デメリット
+- あまりにも快適すぎて、他のフレームワークが使えなくなる恐れがあります。
 
 ## Installation ☘️
+
 ### Install via git URL
 1. Open the Package Manager
-2. Press [＋▼] button and click Add package from git URL...
-3. Enter the following:
+1. Press [＋▼] button and click Add package from git URL...
+1. Enter the following:
     - https://github.com/tanitaka-tech/UnityProcessManager.git
 
 ### Install via OpenUPM
@@ -99,9 +116,10 @@ openupm add com.tanitaka-tech.unity-process-manager
 ```
 
 ## Contribution 🎆
-Issues and PRs are very welcome!
-I'll take a look when I have free time.
-Also, if you're interested in this project, please give it a star!
+IssueやPR作成など、大歓迎です！
+手が空いた際に見させていただきます。
+
+また、このプロジェクトに興味を持っていただけた方は、ぜひスターを付けてください！
 
 ## Requirement
 - [UniTask](https://github.com/Cysharp/UniTask)
