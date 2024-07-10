@@ -1,4 +1,4 @@
-[![openupm](https://img.shields.io/npm/v/com.tanitaka.unity-process-manager?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.tanitaka.unity-process-manager/)
+[![openupm](https://img.shields.io/npm/v/com.tanitaka-tech.unity-process-manager?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.tanitaka-tech.unity-process-manager/)
 ![license](https://img.shields.io/github/license/tanitaka-tech/UnityProcessManager)
 
 ## コンセプト
@@ -108,7 +108,7 @@ private void Start()
 1. Enter the following:
     - https://github.com/tanitaka-tech/UnityProcessManager.git
 
-### ~~Install via OpenUPM~~ (not yet)
+### Install via OpenUPM 
 ```sh
 openupm add com.tanitaka-tech.unity-process-manager
 ```
