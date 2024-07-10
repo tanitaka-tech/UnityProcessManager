@@ -28,5 +28,15 @@ namespace TanitakaTech.UnityProcessManager
                 onPassedTask: (ct) => onPassedTask(waitResult, ct)
             );
         }
+        
+        public UniTask ToUniTask(CancellationToken cancellationToken)
+        {
+            var process = this;
+            return UniTask.Create(async () =>
+            {
+                await process.WaitTask(cancellationToken);
+                await process.OnPassedTask(cancellationToken);
+            });
+        }
     }
 }
