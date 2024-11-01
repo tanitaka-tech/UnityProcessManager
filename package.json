@@ -1,7 +1,7 @@
 {
   "name": "com.tanitaka-tech.unity-process-manager",
   "displayName": "Unity Process Manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "unity": "2022.3",
   "author": "tanitaka-tech",
   "description": "This package provides a framework for managing Unity scene flows and component interactions through a request-based system, eliminating direct dependencies between scene management classes and UI components, thereby improving code maintainability and clarity.",
