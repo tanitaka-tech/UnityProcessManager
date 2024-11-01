@@ -3,31 +3,27 @@
 
 **Docs** ([English](README.md), [日本語](README_JA.md))
 
-## コンセプト
+## このライブラリのミッション
 
-現状の殆どのクライアントフレームワークには大きな欠陥があります。
-それは、Sceneを管理するクラスがScene内のViewを構成するパーツ(ボタンなど)に対して依存してしまう点です。
+- 処理の流れを管理するクラスと、イベントを発火するクラスを疎結合にする
+- 処理の流れを分かりやすく簡潔に表現する手段の提供
 
-パーツを変更するたびにScene管理クラスを修正する必要があるという点が課題です。
-これのせいでSceneの運用コストが増加したり、属人化したりなどの問題が発生します。
+## おすすめのユースケース
+- Scene遷移やAPI呼び出しなど、**並列で行われると怖い処理**に繋がるイベントのハンドリング
+- 待機するイベントを処理の流れに応じて変えたい時
 
-そこでこのパッケージでは上記の課題の解決策として
-「パーツに依存するのではなく、Requestに依存すること」を提唱、そして支援します。
+## 使い方
+1. `RequestPusher`を使用して、各クラスでイベント発火時にRequestを投げる
+2. `RequestConsumer`を使用して、RequestのPushをawait
+3. `ConcurrentProcess`を使用して、複数の`RequestConsumer`の並列待機し、各Requestが来た時の処理を個別に記述
 
-ここで言うRequestとは、「Scene遷移をして欲しい」「APIを呼んでほしい」などの
-Sceneを構成する各パーツからの要求を示す構造体です。
+## コード例
 
-UnityProcessManagerはRequestを使うことでSceneからパーツへの依存を排除するほか、
-Requestを手続き的にハンドリングすることで、 処理の流れを分かりやすく、正確に表現するためのパッケージです。
-
-<img width="952" alt="Screenshot 2024-07-02 at 6 46 58" src="https://github.com/tanitaka-tech/UnityProcessManager/assets/78785830/4960cbb2-71e3-4662-9d35-ea1f51ba302b">
-
-## Usage Example
-
-### Bind RequestHandler (Zenject Example)
+### ① Bind RequestHandler (Zenject Example)
 ```cs
 // ----- In some installer
 
+// Request毎に独自の型を定義する必要があります
 var effectRequestHandler = new RequestHandler<EffectRequest>();
 Container.BindInstance<IRequestPusher<EffectRequest>>(effectRequestHandler);
 
@@ -45,40 +41,7 @@ var waitRequestClass = new WaitRequestClass(
 
 ```
 
-### Wait Request
-```cs
-await ConcurrentProcess.Create(  
-        // Effect
-        Process.Create(  
-            waitTask: async ct => await EffectRequestConsumer.WaitRequestAndConsumeAsync(ct),  
-            onPassedTask: async ct =>  
-            {  
-                await PlayEffectAsync(ct);
-                return ProcessContinueType.Continue;
-            }),
-        
-        // Close
-        Process.Create(  
-            waitTask: async ct => await CloseRequestConsumer.WaitRequestAndConsumeAsync(ct),
-            onPassedTask: async ct =>  
-            {  
-                await CloseAsync(ct);
-                return ProcessContinueType.Break;
-            }), 
-        
-        // NextScene
-        Process.Create(  
-            waitTask: async ct => await NextSceneRequestConsumer.WaitRequestAndConsumeAsync(ct),
-            onPassedTask: async ct =>  
-            {  
-                await LoadNextSceneAsync(ct);
-                return ProcessContinueType.Break;
-            }), 
-        )    
-        .LoopProcessAsync(cancellationToken: ct);
-```
-
-### Push Request (R3 Example)
+### ② Push Request (R3 Example)
 ```cs
 // ----- In some object
 
@@ -94,13 +57,40 @@ private void Start()
 
 ```
 
-
-## メリット
-- Scene内で発生し得るRequestをまとめることで、そのSceneが行使する責務を明確にすることができます。
-- 手続きが正確に表現されるため、処理の流れが非常に追いやすくなります。
-
-## デメリット
-- あまりにも快適すぎて、他のフレームワークが使えなくなる恐れがあります。
+### ③ Wait Request
+```cs
+await ConcurrentProcess.Create(  
+        // waitTaskを抜けた時にonPassedTaskのawaitが行われます。その際、他ProcessのwaitTaskはキャンセルされます
+        // この仕様によって、同時にハンドリングするRequestが常に一つであることを保証します
+        Process.Create(  
+            waitTask: async ct => await EffectRequestConsumer.WaitRequestAndConsumeAsync(ct),  
+            onPassedTask: async ct =>  
+            {  
+                await PlayEffectAsync(ct);
+                // onPassedTaskでContinueを返すと、Requestの並列待機を継続する
+                return ProcessContinueType.Continue;
+            }),
+        
+        Process.Create(  
+            waitTask: async ct => await CloseRequestConsumer.WaitRequestAndConsumeAsync(ct),
+            onPassedTask: async ct =>  
+            {  
+                await CloseAsync(ct);
+                
+                // onPassedTaskでBreakを返すと、LoopProcessAsyncのawaitを抜ける
+                return ProcessContinueType.Break;
+            }), 
+        
+        Process.Create(  
+            waitTask: async ct => await NextSceneRequestConsumer.WaitRequestAndConsumeAsync(ct),
+            onPassedTask: async ct =>  
+            {  
+                await LoadNextSceneAsync(ct);
+                return ProcessContinueType.Break;
+            }), 
+        )    
+        .LoopProcessAsync(cancellationToken: ct);
+```
 
 ## Installation ☘️
 
@@ -117,7 +107,6 @@ openupm add com.tanitaka-tech.unity-process-manager
 
 ## Contribution 🎆
 IssueやPR作成など、大歓迎です！
-手が空いた際に見させていただきます。
 
 また、このプロジェクトに興味を持っていただけた方は、ぜひスターを付けてください！
 
