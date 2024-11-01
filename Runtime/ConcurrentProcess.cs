@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
@@ -16,6 +17,23 @@ namespace TanitakaTech.UnityProcessManager
         public static ConcurrentProcess Create(params Process[] processTasks)
         {
             return new ConcurrentProcess(processTasks);
+        }
+
+        public static ConcurrentProcess Create(params ConcurrentProcess[] concurrentProcesses)
+        {
+            return new ConcurrentProcess(
+                concurrentProcesses.SelectMany(concurrentProcess => concurrentProcess.Processes.ToArray()).ToArray()
+            );
+        }
+
+        public ConcurrentProcess With(params ConcurrentProcess[] concurrentProcesses)
+        {
+            return new ConcurrentProcess(
+                concurrentProcesses
+                    .SelectMany(concurrentProcess => concurrentProcess.Processes.ToArray())
+                    .Concat(Processes.ToArray())
+                    .ToArray()
+            );
         }
         
         public async UniTask LoopProcessAsync(CancellationToken cancellationToken = default)
