@@ -7,13 +7,14 @@ namespace TanitakaTech.UnityProcessManager
         IRequestPusher<TRequest>,
         IRequestConsumer<TRequest> where TRequest : struct
     {
-        private TRequest? _requestValue = null;
+        private TRequest _requestValue;
         private bool _isWaitingRequest = false;
 
         void IRequestPusher<TRequest>.PushRequest(TRequest requestValue)
         {
             if (!_isWaitingRequest) return;
-            
+
+            _isWaitingRequest = false;
             _requestValue = requestValue;
         }
 
@@ -21,11 +22,8 @@ namespace TanitakaTech.UnityProcessManager
         {
             _isWaitingRequest = true;
             cancellationToken.Register(() => _isWaitingRequest = false);
-            await UniTask.WaitUntil(() => _requestValue != null, cancellationToken: cancellationToken);
-            TRequest requestedValue = _requestValue.Value;
-            _requestValue = null;
-            _isWaitingRequest = false;
-            return requestedValue;
+            await UniTask.WaitUntil(() => !_isWaitingRequest, cancellationToken: cancellationToken);
+            return _requestValue;
         }
     }
 }
