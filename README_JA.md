@@ -92,6 +92,20 @@ await ConcurrentProcess.Create(
         .LoopProcessAsync(cancellationToken: ct);
 ```
 
+# Logging
+
+下記のdefine symbolを定義することでログ関連の実装を有効にできます。
+
+`UNITY_PROCESS_MANAGER_LOGGER`
+
+```csharp
+await ConcurrentProcess.CreateWithLog(
+       Logger, // Microsoft.Extensions.Loggingを継承したクラス(ログ出しにはZLoggerがおすすめです)
+       MoveToLicensesProcessProvider // IProcessProviderを継承した自作クラス
+       )
+       .LoopProcessAsync(cancellationToken: cancellationToken);
+```
+
 ## Installation ☘️
 
 ### Install via git URL

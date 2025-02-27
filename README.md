@@ -87,6 +87,7 @@ await ConcurrentProcess.Create(
 # Logging
 
 You can enable logging by defining the following:
+
 `UNITY_PROCESS_MANAGER_LOGGER`
 
 ```csharp
