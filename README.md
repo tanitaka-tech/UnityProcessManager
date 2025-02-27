@@ -84,6 +84,21 @@ await ConcurrentProcess.Create(
         .LoopProcessAsync(cancellationToken: ct);
 ```
 
+# Logging
+
+You can enable logging by defining the following:
+`UNITY_PROCESS_MANAGER_LOGGER`
+
+```csharp
+await ConcurrentProcess.CreateWithLog(
+       Logger, // Some Microsoft.Extensions.Logging implements class.(I recommend using ZLogger)
+       MoveToLicensesProcessProvider // Some IProcessProvider implements class.(This is the class you created)
+       )
+       .LoopProcessAsync(cancellationToken: cancellationToken);
+```
+
+
+
 ## Installation ☘️
 ### Install via git URL
 1. Open the Package Manager
