@@ -3,6 +3,10 @@ using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
+#if UNITY_PROCESS_MANAGER_LOGGER
+using Microsoft.Extensions.Logging;
+#endif
+
 namespace TanitakaTech.UnityProcessManager
 {
     public readonly struct ConcurrentProcess
@@ -18,6 +22,31 @@ namespace TanitakaTech.UnityProcessManager
         {
             return new ConcurrentProcess(processTasks);
         }
+
+        public static ConcurrentProcess Create(params IProcessProvider[] processProviders)
+        {
+            return new ConcurrentProcess(processProviders.Select(processProvider => processProvider.Provide()).ToArray());
+        }
+
+#if UNITY_PROCESS_MANAGER_LOGGER
+        public static ConcurrentProcess CreateWithLog(ILogger logger, params IProcessProvider[] processProviders)
+        {
+            return new ConcurrentProcess(
+                processProviders.Select(processProvider => processProvider.Provide()
+                    .Wrap(Process.Create(waitTask: ct =>
+                        {
+                            logger.LogInformation("WaitTask processProvider: {0}", processProvider.GetType().Name);
+                            return UniTask.CompletedTask;
+                        },
+                        onPassedTask: ct =>
+                        {
+                            logger.LogInformation("OnPassedTask processProvider: {0}",
+                                processProvider.GetType().Name);
+                            return UniTask.FromResult(ProcessContinueType.Continue);
+                        })))
+                    .ToArray());
+        }
+#endif
 
         public static ConcurrentProcess Create(params ConcurrentProcess[] concurrentProcesses)
         {

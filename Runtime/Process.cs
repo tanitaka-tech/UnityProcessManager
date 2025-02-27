@@ -39,4 +39,23 @@ namespace TanitakaTech.UnityProcessManager
             });
         }
     }
+
+    public static class ProcessExtensions
+    {
+        public static Process Wrap(this Process process, Process wrapProcess)
+        {
+            return Process.Create(
+                waitTask: async ct =>
+                {
+                    await wrapProcess.WaitTask(ct);
+                    await process.WaitTask(ct);
+                },
+                onPassedTask: async ct =>
+                {
+                    await wrapProcess.OnPassedTask(ct);
+                    return await process.OnPassedTask(ct);
+                }
+            );
+        }
+    }
 }

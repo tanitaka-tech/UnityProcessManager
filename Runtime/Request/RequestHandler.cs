@@ -10,7 +10,7 @@ namespace TanitakaTech.UnityProcessManager
         private TRequest _requestValue;
         private bool _isWaitingRequest = false;
 
-        void IRequestPusher<TRequest>.PushRequest(TRequest requestValue)
+        public void PushRequest(TRequest requestValue)
         {
             if (!_isWaitingRequest) return;
 
@@ -18,7 +18,7 @@ namespace TanitakaTech.UnityProcessManager
             _requestValue = requestValue;
         }
 
-        async UniTask<TRequest> IRequestConsumer<TRequest>.WaitRequestAndConsumeAsync(CancellationToken cancellationToken)
+        public async UniTask<TRequest> WaitRequestAndConsumeAsync(CancellationToken cancellationToken)
         {
             _isWaitingRequest = true;
             cancellationToken.Register(() => _isWaitingRequest = false);
