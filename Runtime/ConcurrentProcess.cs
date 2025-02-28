@@ -31,17 +31,22 @@ namespace TanitakaTech.UnityProcessManager
 #if UNITY_PROCESS_MANAGER_LOGGER
         public static ConcurrentProcess CreateWithLog(ILogger logger, params IProcessProvider[] processProviders)
         {
+            int count = processProviders.Length;
+            int waitNum = 0;
             return new ConcurrentProcess(
                 processProviders.Select(processProvider => processProvider.Provide()
                     .Wrap(Process.Create(waitTask: ct =>
                         {
-                            logger.LogInformation("WaitTask processProvider: {0}", processProvider.GetType().Name);
+                            waitNum++;
+                            if (waitNum == count)
+                            {
+                                logger.LogInformation("WaitTask count: {0}\n{1}", count, processProviders.Select(pp => pp.GetType().Name));
+                            }
                             return UniTask.CompletedTask;
                         },
                         onPassedTask: ct =>
                         {
-                            logger.LogInformation("OnPassedTask processProvider: {0}",
-                                processProvider.GetType().Name);
+                            logger.LogInformation("OnPassedTask processProvider: {0}", processProvider.GetType().Name);
                             return UniTask.FromResult(ProcessContinueType.Continue);
                         })))
                     .ToArray());
