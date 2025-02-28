@@ -41,6 +41,7 @@ namespace TanitakaTech.UnityProcessManager
                             if (waitNum == count)
                             {
                                 logger.LogInformation("WaitTask count: {0}\n{1}", count, processProviders.Select(pp => pp.GetType().Name));
+                                waitNum = 0;
                             }
                             return UniTask.CompletedTask;
                         },
