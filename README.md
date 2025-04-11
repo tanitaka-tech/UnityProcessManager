@@ -90,7 +90,7 @@ LiteRequestBroker is a class that can be used to send requests without using the
 
 It is good to use in the following cases:
 - The request does not have any parameters
-- If the request is not being handled simultaneously
+- If the request is not being waited simultaneously
 
 ### ① Bind LiteRequestBroker
 ```cs
