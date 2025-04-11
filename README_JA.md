@@ -143,12 +143,19 @@ await ConcurrentProcess.Create(
 
 `UNITY_PROCESS_MANAGER_LOGGER`
 
+### ConcurrentProcessのログ対応
+
 ```csharp
 await ConcurrentProcess.CreateWithLog(
        Logger, // Microsoft.Extensions.Loggingを継承したクラス(ログ出しにはZLoggerがおすすめです)
        MoveToLicensesProcessProvider // IProcessProviderを継承した自作クラス
        )
        .LoopProcessAsync(cancellationToken: cancellationToken);
+```
+
+### LiteRequestBrokerのログ対応
+```csharp
+var liteRequestBroker = new LiteRequestBroker(Logger);
 ```
 
 ## Installation ☘️

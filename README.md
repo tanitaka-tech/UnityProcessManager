@@ -138,6 +138,8 @@ You can enable logging by defining the following:
 
 `UNITY_PROCESS_MANAGER_LOGGER`
 
+### ConcurrentProcess Logging
+
 ```csharp
 await ConcurrentProcess.CreateWithLog(
        Logger, // Some Microsoft.Extensions.Logging implements class.(I recommend using ZLogger)
@@ -146,6 +148,11 @@ await ConcurrentProcess.CreateWithLog(
        .LoopProcessAsync(cancellationToken: cancellationToken);
 ```
 
+### LiteRequestBroker Logging
+
+```csharp
+var liteRequestBroker = new LiteRequestBroker(Logger);
+```
 
 
 ## Installation ☘️
