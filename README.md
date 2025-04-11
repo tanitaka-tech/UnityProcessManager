@@ -84,7 +84,55 @@ await ConcurrentProcess.Create(
         .LoopProcessAsync(cancellationToken: ct);
 ```
 
-# Logging
+## LiteRequestBroker
+
+LiteRequestBroker is a class that can be used to send requests without using the RequestHandler class.
+
+It is good to use in the following cases:
+- The request does not have any parameters
+- If the request is not being handled simultaneously
+
+### ① Bind LiteRequestBroker
+```cs
+// ----- In some installer
+
+var liteRequestBroker = new LiteRequestBroker();
+Container.BindInstance<ILiteRequestPusher>(liteRequestBroker);
+Container.BindInstance<ILiteRequestConsumer>(liteRequestBroker);
+```
+
+### ② Push Request (R3 Example)
+```cs
+// ----- In some object
+[SerializeField] private Button _closeButton;
+[Inject] private ILiteRequestPusher _liteRequestPusher;
+private void Start()
+{
+        _closeButton.OnClickAsObservable()
+                // I reccommend defining a const string for each request
+                .Subscribe(_ => _liteRequestPusher.PushRequest("CloseRequest"))
+                .AddTo(this);
+}
+```
+
+### ③ Wait Request
+```cs
+await ConcurrentProcess.Create(  
+        Process.Create(  
+            waitTask: async ct => await LiteRequestConcumer.WaitRequestAndConsumeAsync("CloseRequest", ct),  
+            onPassedTask: async ct =>  
+            {  
+                await CloseAsync(ct);
+                return ProcessContinueType.Break;
+            }),
+          
+            // ...
+        )    
+        .LoopProcessAsync(cancellationToken: ct);
+```
+
+
+## Logging
 
 You can enable logging by defining the following:
 
