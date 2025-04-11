@@ -5,6 +5,6 @@ namespace TanitakaTech.UnityProcessManager
 {
     public interface IRequestConsumer<TRequest>
     {
-        public UniTask<TRequest> WaitRequestAndConsumeAsync(CancellationToken cancellationToken);
+        UniTask<TRequest> WaitRequestAndConsumeAsync(CancellationToken cancellationToken);
     }
 }
