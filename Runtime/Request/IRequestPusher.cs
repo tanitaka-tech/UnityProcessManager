@@ -2,6 +2,6 @@
 {
     public interface IRequestPusher<TRequest>
     {
-        public void PushRequest(TRequest requestValue);
+        void PushRequest(TRequest requestValue);
     }
 }

@@ -17,8 +17,6 @@
 2. `RequestConsumer`を使用して、RequestのPushをawait
 3. `ConcurrentProcess`を使用して、複数の`RequestConsumer`の並列待機し、各Requestが来た時の処理を個別に記述
 
-## コード例
-
 ### ① Bind RequestHandler (Zenject Example)
 ```cs
 // ----- In some installer
@@ -92,11 +90,60 @@ await ConcurrentProcess.Create(
         .LoopProcessAsync(cancellationToken: ct);
 ```
 
-# Logging
+## LiteRequestBroker
+
+LiteRequestBrokerは、RequestHandlerクラスを使用せずにリクエストを送信するために使用できるクラスです。
+
+下記のような場合に使用することをおすすめします。
+- リクエストがパラメータを持たない時
+- 同じリクエストが同時に待機されない時
+
+### ① Bind LiteRequestBroker
+```cs
+// ----- In some installer
+
+var liteRequestBroker = new LiteRequestBroker();
+Container.BindInstance<ILiteRequestPusher>(liteRequestBroker);
+Container.BindInstance<ILiteRequestConsumer>(liteRequestBroker);
+```
+
+### ② Push Request (R3 Example)
+```cs
+// ----- In some object
+[SerializeField] private Button _closeButton;
+[Inject] private ILiteRequestPusher _liteRequestPusher;
+private void Start()
+{
+        _closeButton.OnClickAsObservable()
+                // I reccommend defining a const string for each request
+                .Subscribe(_ => _liteRequestPusher.PushRequest("CloseRequest"))
+                .AddTo(this);
+}
+```
+
+### ③ Wait Request
+```cs
+await ConcurrentProcess.Create(  
+        Process.Create(  
+            waitTask: async ct => await LiteRequestConcumer.WaitRequestAndConsumeAsync("CloseRequest", ct),  
+            onPassedTask: async ct =>  
+            {  
+                await CloseAsync(ct);
+                return ProcessContinueType.Break;
+            }),
+          
+            // ...
+        )    
+        .LoopProcessAsync(cancellationToken: ct);
+```
+
+## Logging
 
 下記のdefine symbolを定義することでログ関連の実装を有効にできます。
 
 `UNITY_PROCESS_MANAGER_LOGGER`
+
+### ConcurrentProcessのログ対応
 
 ```csharp
 await ConcurrentProcess.CreateWithLog(
@@ -104,6 +151,11 @@ await ConcurrentProcess.CreateWithLog(
        MoveToLicensesProcessProvider // IProcessProviderを継承した自作クラス
        )
        .LoopProcessAsync(cancellationToken: cancellationToken);
+```
+
+### LiteRequestBrokerのログ対応
+```csharp
+var liteRequestBroker = new LiteRequestBroker(Logger);
 ```
 
 ## Installation ☘️

@@ -11,11 +11,11 @@ namespace TanitakaTech.UnityProcessManager
 {
     public readonly struct ConcurrentProcess
     {
-        private Memory<Process> Processes { get; }
+        private readonly Memory<Process> _processes;
 
         private ConcurrentProcess(params Process[] processTasks)
         {
-            Processes = new Memory<Process>(processTasks);
+            _processes = new Memory<Process>(processTasks);
         }
         
         public static ConcurrentProcess Create(params Process[] processTasks)
@@ -57,7 +57,7 @@ namespace TanitakaTech.UnityProcessManager
         public static ConcurrentProcess Create(params ConcurrentProcess[] concurrentProcesses)
         {
             return new ConcurrentProcess(
-                concurrentProcesses.SelectMany(concurrentProcess => concurrentProcess.Processes.ToArray()).ToArray()
+                concurrentProcesses.SelectMany(concurrentProcess => concurrentProcess._processes.ToArray()).ToArray()
             );
         }
 
@@ -65,8 +65,8 @@ namespace TanitakaTech.UnityProcessManager
         {
             return new ConcurrentProcess(
                 concurrentProcesses
-                    .SelectMany(concurrentProcess => concurrentProcess.Processes.ToArray())
-                    .Concat(Processes.ToArray())
+                    .SelectMany(concurrentProcess => concurrentProcess._processes.ToArray())
+                    .Concat(_processes.ToArray())
                     .ToArray()
             );
         }
@@ -84,15 +84,16 @@ namespace TanitakaTech.UnityProcessManager
         {
             CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            UniTask[] tasks = new UniTask[Processes.Length];
-            for (int i = 0; i < Processes.Length; i++)
+            var length = _processes.Length;
+            UniTask[] tasks = new UniTask[length];
+            for (int i = 0; i < length; i++)
             {
-                tasks[i] = Processes.Span[i].WaitTask(cancellationTokenSource.Token);
+                tasks[i] = _processes.Span[i].WaitTask(cancellationTokenSource.Token);
             }
 
             var passedTaskIndex = await UniTask.WhenAny(tasks);
             cancellationTokenSource.Cancel();
-            return await Processes.Span[passedTaskIndex].OnPassedTask(cancellationToken);
+            return await _processes.Span[passedTaskIndex].OnPassedTask(cancellationToken);
         }
     }
 }
