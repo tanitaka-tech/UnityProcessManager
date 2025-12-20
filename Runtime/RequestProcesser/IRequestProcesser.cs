@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
@@ -17,13 +18,13 @@ namespace TanitakaTech.UnityProcessManager
 
     public static class RequestProcesserExtensions
     {
-        public static async UniTask RunAsync(this IRequestProcesser[] processors, CancellationToken cancellationToken)
+        public static async UniTask RunAsync(this IReadOnlyList<IRequestProcesser> processors, CancellationToken cancellationToken)
         {
-            var length = processors.Length;
+            var length = processors.Count;
             if (length == 0) return;
 
             var tasks = new UniTask[length];
-            ProcessResult processResult = ProcessResult.Continue;
+            ProcessResult processResult;
             do {
                 var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 for (int i = 0; i < length; i++)
