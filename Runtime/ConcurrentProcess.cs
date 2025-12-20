@@ -73,27 +73,21 @@ namespace TanitakaTech.UnityProcessManager
         
         public async UniTask LoopProcessAsync(CancellationToken cancellationToken = default)
         {
-            ProcessContinueType continueType = default;
-            do
-            {
-                continueType = await InternalProcessAsync(cancellationToken);
-            } while (continueType == ProcessContinueType.Continue);
-        }
-
-        private async UniTask<ProcessContinueType> InternalProcessAsync(CancellationToken cancellationToken)
-        {
-            CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
             var length = _processes.Length;
             UniTask[] tasks = new UniTask[length];
-            for (int i = 0; i < length; i++)
-            {
-                tasks[i] = _processes.Span[i].WaitTask(cancellationTokenSource.Token);
-            }
+            ProcessContinueType continueType = default;
+            do {
+                CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            var passedTaskIndex = await UniTask.WhenAny(tasks);
-            cancellationTokenSource.Cancel();
-            return await _processes.Span[passedTaskIndex].OnPassedTask(cancellationToken);
+                for (int i = 0; i < length; i++)
+                {
+                    tasks[i] = _processes.Span[i].WaitTask(cancellationTokenSource.Token);
+                }
+                var passedTaskIndex = await UniTask.WhenAny(tasks);
+                cancellationTokenSource.Cancel();
+                cancellationTokenSource.Dispose();
+                continueType = await _processes.Span[passedTaskIndex].OnPassedTask(cancellationToken);
+            } while (continueType == ProcessContinueType.Continue && !cancellationToken.IsCancellationRequested);
         }
     }
 }
