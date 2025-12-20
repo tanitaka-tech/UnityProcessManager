@@ -87,7 +87,7 @@ namespace TanitakaTech.UnityProcessManager
                 cancellationTokenSource.Cancel();
                 cancellationTokenSource.Dispose();
                 continueType = await _processes.Span[passedTaskIndex].OnPassedTask(cancellationToken);
-            } while (continueType == ProcessContinueType.Continue);
+            } while (continueType == ProcessContinueType.Continue && !cancellationToken.IsCancellationRequested);
         }
     }
 }
