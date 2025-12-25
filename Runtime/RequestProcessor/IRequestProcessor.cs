@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 
 namespace TanitakaTech.UnityProcessManager
 {
-    public interface IRequestProcesser
+    public interface IRequestProcessor
     {
         UniTask WaitAsync(CancellationToken cancellationToken);
         UniTask<ProcessResult> ProcessAsync(CancellationToken cancellationToken);
@@ -18,7 +18,7 @@ namespace TanitakaTech.UnityProcessManager
 
     public static class RequestProcesserExtensions
     {
-        public static async UniTask RunAsync(this IReadOnlyList<IRequestProcesser> processors, CancellationToken cancellationToken)
+        public static async UniTask RunAsync(this IReadOnlyList<IRequestProcessor> processors, CancellationToken cancellationToken)
         {
             var length = processors.Count;
             if (length == 0) return;

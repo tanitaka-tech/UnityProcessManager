@@ -44,7 +44,7 @@ namespace TanitakaTech.UnityProcessManager
 #if UNITY_PROCESS_MANAGER_LOGGER
             else
             {
-                _logger.LogInformation("Any consumer is not waiting for a {0}", request);
+                _logger.LogError($"Any consumer is not waiting for a {request}");
             }
 #endif
         }
@@ -52,13 +52,13 @@ namespace TanitakaTech.UnityProcessManager
         async UniTask ILiteRequestConsumer.WaitRequestAndConsumeAsync(string waitRequest, CancellationToken cancellationToken)
         {
 #if UNITY_PROCESS_MANAGER_LOGGER
-            _logger.LogInformation("Start waiting for a {0}", waitRequest);
+            _logger.LogInformation($"Start waiting for a {waitRequest}");
 #endif
             _waitRequests.Add(waitRequest);
             cancellationToken.Register(() => _waitRequests.Remove(waitRequest));
             await UniTask.WaitUntil(() => !_waitRequests.Contains(waitRequest), cancellationToken: cancellationToken);
 #if UNITY_PROCESS_MANAGER_LOGGER
-            _logger.LogInformation("{0} was consumed", waitRequest);
+            _logger.LogInformation($"{waitRequest} was consumed");
 #endif
         }
     }
