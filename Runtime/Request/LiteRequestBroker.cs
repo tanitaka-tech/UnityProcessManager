@@ -30,10 +30,12 @@ namespace TanitakaTech.UnityProcessManager
             _waitRequests = new HashSet<string>(initialCapacity);
         }
 
+#if UNITY_PROCESS_MANAGER_LOGGER
         public LiteRequestBroker(int initialCapacity)
         {
             _waitRequests = new HashSet<string>(initialCapacity);
         }
+#endif
         
         void ILiteRequestPusher.PushRequest(string request)
         {
