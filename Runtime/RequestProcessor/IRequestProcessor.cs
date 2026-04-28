@@ -16,13 +16,14 @@ namespace TanitakaTech.UnityProcessManager
         Break
     }
 
-    public static class RequestProcesserExtensions
+    public static class RequestProcessorExtensions
     {
-        public static async UniTask RunAsync(this IReadOnlyList<IRequestProcessor> processors, CancellationToken cancellationToken)
+        public static async UniTask<int?> RunAsync(this IReadOnlyList<IRequestProcessor> processors, CancellationToken cancellationToken)
         {
             var length = processors.Count;
-            if (length == 0) return;
+            if (length == 0) return null;
 
+            var passedTaskIndex = 0;
             var tasks = new UniTask[length];
             ProcessResult processResult;
             do {
@@ -31,11 +32,13 @@ namespace TanitakaTech.UnityProcessManager
                 {
                     tasks[i] = processors[i].WaitAsync(cts.Token);
                 }
-                var passedTaskIndex = await UniTask.WhenAny(tasks);
+                passedTaskIndex = await UniTask.WhenAny(tasks);
                 cts.Cancel();
                 cts.Dispose();
                 processResult = await processors[passedTaskIndex].ProcessAsync(cancellationToken);
             } while (processResult == ProcessResult.Continue && !cancellationToken.IsCancellationRequested);
+
+            return passedTaskIndex;
         }
     }
 }
